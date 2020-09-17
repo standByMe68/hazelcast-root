@@ -136,10 +136,6 @@ public class XmlConfigLocator {
         return true;
     }
 
-    public static void main(String[] args) {
-        System.out.println(System.getProperties());
-    }
-
     private boolean loadFromSystemProperty() {
         //查看当前系统的配置文件是否有配置hazelcast
         String configSystemProperty = System.getProperty("hazelcast.config");
@@ -191,11 +187,12 @@ public class XmlConfigLocator {
         if (resource.isEmpty()) {
             throw new HazelcastException("classpath resource can't be empty");
         }
-
+        //获取源文件目录文件流
         in = Config.class.getClassLoader().getResourceAsStream(resource);
         if (in == null) {
             throw new HazelcastException("Could not load classpath resource: " + resource);
         }
+        ///获取配置文件URL
         configurationUrl = Config.class.getResource(resource);
     }
 }
