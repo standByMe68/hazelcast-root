@@ -44,7 +44,7 @@ public final class StartServer {
      */
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         //使用Hazelcast的静态方法
-        HazelcastInstance hz = Hazelcast.newHazelcastInstance(null);
+        HazelcastInstance hz = Hazelcast.newHazelcastInstance();
         printMemberPort(hz);
     }
 

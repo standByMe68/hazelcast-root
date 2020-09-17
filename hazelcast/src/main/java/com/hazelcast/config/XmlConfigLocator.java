@@ -49,6 +49,9 @@ public class XmlConfigLocator {
      *
      * @throws HazelcastException if there was a problem locating the config-file
      */
+    /**
+     * 获取一个配置文件的配置
+     */
     public XmlConfigLocator() {
         try {
             //从系统文件中获取当前hazelcast.config
@@ -133,16 +136,21 @@ public class XmlConfigLocator {
         return true;
     }
 
-    private boolean loadFromSystemProperty() {
-        String configSystemProperty = System.getProperty("hazelcast.config");
+    public static void main(String[] args) {
+        System.out.println(System.getProperties());
+    }
 
+    private boolean loadFromSystemProperty() {
+        //查看当前系统的配置文件是否有配置hazelcast
+        String configSystemProperty = System.getProperty("hazelcast.config");
+        //如果没有配置打出日志返回
         if (configSystemProperty == null) {
             LOGGER.finest("Could not 'hazelcast.config' System property");
             return false;
         }
 
         LOGGER.info("Loading configuration " + configSystemProperty + " from System property 'hazelcast.config'");
-
+        //如果当前配置文件是在源文件目录路径下
         if (configSystemProperty.startsWith("classpath:")) {
             loadSystemPropertyClassPathResource(configSystemProperty);
         } else {
