@@ -213,9 +213,12 @@ public class XmlConfigBuilder extends AbstractConfigBuilder implements ConfigBui
     }
 
     Config build(Config config) {
+        //给配置对象配置配置文件对象
         config.setConfigurationFile(configurationFile);
+        //给配置对象配置配置文件对象
         config.setConfigurationUrl(configurationUrl);
         try {
+            //解析和创建配置
             parseAndBuildConfig(config);
         } catch (Exception e) {
             throw ExceptionUtil.rethrow(e);
@@ -225,14 +228,19 @@ public class XmlConfigBuilder extends AbstractConfigBuilder implements ConfigBui
 
     private void parseAndBuildConfig(Config config) throws Exception {
         this.config = config;
+        //通过配置文件输入流获取配置文件对象
         Document doc = parse(in);
+        //获取当前文件中的元素对象
         Element root = doc.getDocumentElement();
+        //检查根节点
         checkRootElement(root);
         try {
+            //获取文件上下文
             root.getTextContent();
         } catch (Throwable e) {
             domLevel3 = false;
         }
+        //处理分析XML文件中的元素
         process(root);
         if (shouldValidateTheSchema()) {
             schemaValidation(root.getOwnerDocument());
@@ -241,6 +249,7 @@ public class XmlConfigBuilder extends AbstractConfigBuilder implements ConfigBui
     }
 
     private void checkRootElement(Element root) {
+        //获取根节点名称 hazelcast
         String rootNodeName = root.getNodeName();
         if (!XmlElements.HAZELCAST.isEqual(rootNodeName)) {
             throw new InvalidConfigurationException("Invalid root element in xml configuration! "
@@ -256,12 +265,17 @@ public class XmlConfigBuilder extends AbstractConfigBuilder implements ConfigBui
 
     @Override
     protected Document parse(InputStream is) throws Exception {
+        //通过工厂模式类的静态方法实例化对象获取文件创建工厂对象
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        //设置名字空间感知？？？？
         dbf.setNamespaceAware(true);
+        //设置工厂模式特征
         dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        //使用建造者模式获取建造者对象
         DocumentBuilder builder = dbf.newDocumentBuilder();
         Document doc;
         try {
+            //通过字节输入流生成对应的文件对象
             doc = builder.parse(is);
         } catch (Exception e) {
             if (configurationFile != null) {

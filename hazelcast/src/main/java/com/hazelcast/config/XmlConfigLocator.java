@@ -20,10 +20,7 @@ import com.hazelcast.core.HazelcastException;
 import com.hazelcast.logging.ILogger;
 import com.hazelcast.logging.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -73,6 +70,7 @@ public class XmlConfigLocator {
         }
     }
 
+
     public InputStream getIn() {
         return in;
     }
@@ -100,6 +98,7 @@ public class XmlConfigLocator {
             throw new HazelcastException("Could not load 'hazelcast-default.xml' from classpath");
         }
     }
+
 
     private boolean loadHazelcastXmlFromClasspath() {
         URL url = Config.class.getClassLoader().getResource("hazelcast.xml");
@@ -195,4 +194,6 @@ public class XmlConfigLocator {
         ///获取配置文件URL
         configurationUrl = Config.class.getResource(resource);
     }
+
+
 }

@@ -117,6 +117,7 @@ public final class HazelcastInstanceFactory {
      * @return the configured {@link HazelcastInstance}
      */
     public static HazelcastInstance newHazelcastInstance(Config config) {
+        //读取当前的配置文件，生成配置文件对象config
         if (config == null) {
             config = new XmlConfigBuilder().build();
         }

@@ -143,6 +143,11 @@ public abstract class AbstractConfigBuilder extends AbstractXmlConfigHelper {
     @Override
     protected abstract ConfigType getXmlType();
 
+
+    /**
+     * 替换和检验当前XML当中的部分需要替换的变量单位
+     * @param root 文件根节点
+     */
     private void traverseChildrenAndReplaceVariables(Node root) {
         NamedNodeMap attributes = root.getAttributes();
         if (attributes != null) {

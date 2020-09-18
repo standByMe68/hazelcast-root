@@ -1527,7 +1527,7 @@ public class ConsoleApp implements EntryListener<Object, Object>, ItemListener<O
     public static void main(String[] args) throws Exception {
         Config config;
         try {
-            config = new FileSystemXmlConfig("hazelcast.xml");
+            config = new FileSystemXmlConfig("src/hazelcast.xml");
         } catch (FileNotFoundException e) {
             config = new Config();
         }
