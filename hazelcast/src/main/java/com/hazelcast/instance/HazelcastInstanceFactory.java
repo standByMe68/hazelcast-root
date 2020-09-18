@@ -122,6 +122,8 @@ public final class HazelcastInstanceFactory {
             config = new XmlConfigBuilder().build();
         }
 
+        System.out.println(config.toString());
+
         return newHazelcastInstance(
                 config,
                 config.getInstanceName(),
@@ -186,8 +188,10 @@ public final class HazelcastInstanceFactory {
 
     private static HazelcastInstanceProxy constructHazelcastInstance(Config config, String instanceName, NodeContext nodeContext,
                                                                      InstanceFuture future) {
+        // 获取
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
+        // 获取hazelcast代理对象
         HazelcastInstanceProxy proxy;
         try {
             if (classLoader == null) {

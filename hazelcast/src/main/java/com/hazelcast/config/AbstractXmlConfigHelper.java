@@ -143,7 +143,9 @@ public abstract class AbstractXmlConfigHelper {
     protected void schemaValidation(Document doc) throws Exception {
         ArrayList<StreamSource> schemas = new ArrayList<StreamSource>();
         InputStream inputStream = null;
+        //获取当前xsi:schemaLocation的属性
         String schemaLocation = doc.getDocumentElement().getAttribute("xsi:schemaLocation");
+        //替换当前数据
         schemaLocation = schemaLocation.replaceAll("^ +| +$| (?= )", "");
 
         // get every two pair. every pair includes namespace and uri
@@ -157,10 +159,10 @@ public abstract class AbstractXmlConfigHelper {
             String uri = xsdLocation.split('[' + LINE_SEPARATOR + " ]+")[1];
 
             // if this is hazelcast namespace but location is different log only warning
+            // 判断当前xml架构是否正确
             if (namespace.equals(xmlns) && !uri.endsWith(hazelcastSchemaLocation)) {
                 LOGGER.warning("Name of the hazelcast schema location incorrect using default");
             }
-
             // if this is not hazelcast namespace then try to load from uri
             if (!namespace.equals(xmlns)) {
                 inputStream = loadSchemaFile(uri);
@@ -168,11 +170,13 @@ public abstract class AbstractXmlConfigHelper {
             }
         }
 
-        // include hazelcast schema
+        // include hazelcast schema 添加配置文件中的架构
         schemas.add(new StreamSource(getClass().getClassLoader().getResourceAsStream(hazelcastSchemaLocation)));
 
-        // document to InputStream conversion
+        // document to InputStream conversion 获取当前字节数组输出对象
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        // 通过文件对象获取xml文件源
         Source xmlSource = new DOMSource(doc);
         Result outputTarget = new StreamResult(outputStream);
         TransformerFactory.newInstance().newTransformer().transform(xmlSource, outputTarget);
@@ -183,6 +187,7 @@ public abstract class AbstractXmlConfigHelper {
         Schema schema = schemaFactory.newSchema(schemas.toArray(new Source[schemas.size()]));
         Validator validator = schema.newValidator();
         try {
+            // 使用SAX对数据进行解析验证
             SAXSource source = new SAXSource(new InputSource(is));
             validator.validate(source);
         } catch (Exception e) {

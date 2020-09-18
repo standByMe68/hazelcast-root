@@ -242,6 +242,7 @@ public class XmlConfigBuilder extends AbstractConfigBuilder implements ConfigBui
         }
         //处理分析XML文件中的元素
         process(root);
+        //验证架构当前版本
         if (shouldValidateTheSchema()) {
             schemaValidation(root.getOwnerDocument());
         }
@@ -302,6 +303,11 @@ public class XmlConfigBuilder extends AbstractConfigBuilder implements ConfigBui
         return doc;
     }
 
+    /**
+     * 对每一个xml标签进行解析
+     * @param docElement
+     * @throws Exception
+     */
     private void handleConfig(Element docElement) throws Exception {
         for (Node node : childElements(docElement)) {
             String nodeName = cleanNodeName(node);

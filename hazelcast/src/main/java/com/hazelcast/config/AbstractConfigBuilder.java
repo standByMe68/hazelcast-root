@@ -88,6 +88,7 @@ public abstract class AbstractConfigBuilder extends AbstractXmlConfigHelper {
     }
 
     private void replaceImportElementsWithActualFileContents(Node root) throws Exception {
+        //获取文件对象
         Document document = root.getOwnerDocument();
         NodeList misplacedImports = (NodeList) xpath.evaluate(
                 format("//hz:%s/parent::*[not(self::hz:%s)]", IMPORT.name, getXmlType().name), document, XPathConstants.NODESET);
@@ -149,45 +150,56 @@ public abstract class AbstractConfigBuilder extends AbstractXmlConfigHelper {
      * @param root 文件根节点
      */
     private void traverseChildrenAndReplaceVariables(Node root) {
+        //获取当前根节点的属性对象
         NamedNodeMap attributes = root.getAttributes();
         if (attributes != null) {
             for (int k = 0; k < attributes.getLength(); k++) {
+                //获取当前的属性节点
                 Node attribute = attributes.item(k);
                 replaceVariables(attribute);
             }
         }
-         if (root.getNodeValue() != null) {
+        //如果当前根节点只有当前节点
+        if (root.getNodeValue() != null) {
             replaceVariables(root);
         }
+        //获取当前所有的子节点列表
         final NodeList childNodes = root.getChildNodes();
         for (int k = 0; k < childNodes.getLength(); k++) {
             Node child = childNodes.item(k);
+            //深沉遍历
             traverseChildrenAndReplaceVariables(child);
         }
     }
 
     private void replaceVariables(Node node) {
+        //获取当前节点值
         String value = node.getNodeValue();
         StringBuilder sb = new StringBuilder(value);
         int endIndex = -1;
         int startIndex = sb.indexOf("${");
         while (startIndex > -1) {
+            //如果当前属性值只有}没有${当前值的属性不读
             endIndex = sb.indexOf("}", startIndex);
             if (endIndex == -1) {
                 LOGGER.warning("Bad variable syntax. Could not find a closing curly bracket '}' on node: " + node.getLocalName());
                 break;
             }
-
+            //获取当前需要替换的变量名称
             String variable = sb.substring(startIndex + 2, endIndex);
+            //根据变量的配置文件获取当前变量名对应的值
             String variableReplacement = getProperties().getProperty(variable);
             if (variableReplacement != null) {
+                //替换成对应的数值
                 sb.replace(startIndex, endIndex + 1, variableReplacement);
                 endIndex = startIndex + variableReplacement.length();
             } else {
                 LOGGER.warning("Could not find a value for property  '" + variable + "' on node: " + node.getLocalName());
             }
+            //获取下一个需要替换的变量
             startIndex = sb.indexOf("${", endIndex);
         }
+        //将节点的数值改编成当前的已经替换变量的值
         node.setNodeValue(sb.toString());
     }
 }
