@@ -99,21 +99,22 @@ public class HazelcastProperties {
      * @return the value or <tt>null</tt> if nothing has been configured
      */
     public String getString(HazelcastProperty property) {
+        //配置文件中没有当前配置
         String value = properties.getProperty(property.getName());
         if (value != null) {
             return value;
         }
-
+        //系统配置中没有当前配置
         value = property.getSystemProperty();
         if (value != null) {
             return value;
         }
-
+        //父配置文件中没有配置
         HazelcastProperty parent = property.getParent();
         if (parent != null) {
             return getString(parent);
         }
-
+        //已经遗弃的名称
         String deprecatedName = property.getDeprecatedName();
         if (deprecatedName != null) {
             value = get(deprecatedName);
@@ -130,7 +131,7 @@ public class HazelcastProperties {
                 return value;
             }
         }
-
+        //使用默认的配置文件
         return property.getDefaultValue();
     }
 

@@ -135,6 +135,7 @@ public class DefaultNodeExtension implements NodeExtension {
         BuildInfo buildInfo = node.getBuildInfo();
 
         String build = buildInfo.getBuild();
+        //获取修订版本
         String revision = buildInfo.getRevision();
         if (!revision.isEmpty()) {
             build += " - " + revision;

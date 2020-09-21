@@ -122,7 +122,9 @@ public class NodeEngineImpl implements NodeEngine {
         this.serializationService = node.getSerializationService();
         this.logger = node.getLogger(NodeEngine.class.getName());
         this.metricsRegistry = newMetricRegistry(node);
+        //代理服务
         this.proxyService = new ProxyServiceImpl(this);
+        //服务管理器
         this.serviceManager = new ServiceManagerImpl(this);
         this.executionService = new ExecutionServiceImpl(this);
         this.operationService = new OperationServiceImpl(this);
@@ -228,6 +230,7 @@ public class NodeEngineImpl implements NodeEngine {
         serviceManager.start();
         proxyService.init();
         operationService.start();
+        //分区线程和普通线程
         quorumService.start();
         diagnostics.start();
 

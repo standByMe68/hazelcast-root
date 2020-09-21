@@ -50,19 +50,23 @@ public class DefaultNodeContext implements NodeContext {
 
     @Override
     public AddressPicker createAddressPicker(Node node) {
+        //获取配置文件对象
         Config config = node.getConfig();
+        //获取配置文件中的network配置     但是没有看到在配置文件中配置成员地址提供者对象的
         MemberAddressProviderConfig memberAddressProviderConfig = config.getNetworkConfig().getMemberAddressProviderConfig();
 
         final ILogger addressPickerLogger = node.getLogger(AddressPicker.class);
+        //判断当前成员配置对象是否可用
         if (!memberAddressProviderConfig.isEnabled()) {
             return new DefaultAddressPicker(config, node.getProperties(), addressPickerLogger);
         }
-
+        //
         MemberAddressProvider implementation = memberAddressProviderConfig.getImplementation();
         if (implementation != null) {
             return new DelegatingAddressPicker(implementation, config.getNetworkConfig(), addressPickerLogger);
         }
         ClassLoader classLoader = config.getClassLoader();
+        //获取当前成员配置对象名称
         String classname = memberAddressProviderConfig.getClassName();
         Class<?> clazz = loadMemberAddressProviderClass(classLoader, classname);
 

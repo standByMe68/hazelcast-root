@@ -476,6 +476,7 @@ public class TcpIpConnectionManager implements ConnectionManager, PacketHandler 
         if (live) {
             return;
         }
+        //p按段socket连接是否正常
         if (!serverSocketChannel.isOpen()) {
             throw new IllegalStateException("ConnectionManager is already shutdown. Cannot start!");
         }

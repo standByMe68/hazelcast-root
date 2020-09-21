@@ -168,17 +168,23 @@ public class Node {
         this.hazelcastInstance = hazelcastInstance;
         this.config = config;
         this.configClassLoader = getConfigClassloader(config);
+        //获取配置，但是这个配置是否是自己配置的
         this.properties = new HazelcastProperties(config);
-
+        //默认 TERMINATE
         String policy = properties.getString(SHUTDOWNHOOK_POLICY);
+        //节点死亡时回调线程
         this.shutdownHookThread = new NodeShutdownHookThread("hz.ShutdownThread", policy);
         // Calling getBuildInfo() instead of directly using BuildInfoProvider.BUILD_INFO.
         // Version can be overridden via system property. That's why BuildInfo should be parsed for each Node.
+        //版本可以被每一个系统重写
         this.buildInfo = BuildInfoProvider.getBuildInfo();
         this.version = MemberVersion.of(buildInfo.getVersion());
 
+        //日志类型默认  JDK
         String loggingType = properties.getString(LOGGING_TYPE);
+        //参数  dev jdk 获取系统版本信息  该对象用于输出日志
         loggingService = new LoggingServiceImpl(config.getGroupConfig().getName(), loggingType, buildInfo);
+        //参数  nodeContext 默认上下文
         final AddressPicker addressPicker = nodeContext.createAddressPicker(this);
         try {
             addressPicker.pickAddress();
@@ -190,7 +196,9 @@ public class Node {
         try {
             boolean liteMember = config.isLiteMember();
             address = addressPicker.getPublicAddress();
+            //获取默认的节点拓展对象
             nodeExtension = nodeContext.createNodeExtension(this);
+            //查看系统配置中有没有配置对应的节点成员
             final Map<String, Object> memberAttributes = findMemberAttributes(config.getMemberAttributeConfig().asReadOnly());
             MemberImpl localMember = new MemberImpl(address, version, true, nodeExtension.createMemberUuid(address),
                     memberAttributes, liteMember, hazelcastInstance);
@@ -198,7 +206,9 @@ public class Node {
             logger = loggingService.getLogger(Node.class.getName());
 
             nodeExtension.printNodeInfo();
+            //可以通过覆写nodeExtension的beforeStart方法对节点进行操作或者进行日志记录
             nodeExtension.beforeStart();
+
 
             serializationService = nodeExtension.createSerializationService();
             securityContext = config.getSecurityConfig().isEnabled() ? nodeExtension.getSecurityContext() : null;
@@ -231,6 +241,7 @@ public class Node {
     }
 
     private ClassLoader getConfigClassloader(Config config) {
+        //初始化config时实例化该对象
         UserCodeDeploymentConfig userCodeDeploymentConfig = config.getUserCodeDeploymentConfig();
         ClassLoader classLoader;
         if (userCodeDeploymentConfig.isEnabled()) {
@@ -243,6 +254,7 @@ public class Node {
                 }
             });
         } else {
+            //获取配置文件的类加载器
             classLoader = config.getClassLoader();
         }
         return classLoader;

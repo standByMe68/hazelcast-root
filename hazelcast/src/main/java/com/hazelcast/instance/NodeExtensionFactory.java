@@ -35,6 +35,7 @@ public final class NodeExtensionFactory {
     public static NodeExtension create(Node node) {
         try {
             ClassLoader classLoader = node.getConfigClassLoader();
+            //通过获取当前对象的实现对象获取节点拓展功能
             Iterator<Class<NodeExtension>> iter = ServiceLoader.classIterator(NodeExtension.class, FACTORY_ID, classLoader);
             while (iter.hasNext()) {
                 Class<NodeExtension> clazz = iter.next();

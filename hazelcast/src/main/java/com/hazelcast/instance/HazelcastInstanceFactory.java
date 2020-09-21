@@ -122,7 +122,6 @@ public final class HazelcastInstanceFactory {
             config = new XmlConfigBuilder().build();
         }
 
-        System.out.println(config.toString());
 
         return newHazelcastInstance(
                 config,
@@ -155,20 +154,22 @@ public final class HazelcastInstanceFactory {
     /**
      * Creates a new Hazelcast instance.
      *
-     * @param config       the configuration to use; if <code>null</code>, the set of defaults
+     * @param config    配置属性对象   the configuration to use; if <code>null</code>, the set of defaults
      *                     as specified in the XSD for the configuration XML will be used.
-     * @param instanceName the name of the {@link HazelcastInstance}
-     * @param nodeContext  the {@link NodeContext} to use
+     * @param instanceName 实例化名称 the name of the {@link HazelcastInstance}
+     * @param nodeContext  节点上下文 the {@link NodeContext} to use
      * @return the configured {@link HazelcastInstance}
      */
     public static HazelcastInstance newHazelcastInstance(Config config, String instanceName, NodeContext nodeContext) {
+        //如果配置为空，再次获取配置
         if (config == null) {
             config = new XmlConfigBuilder().build();
         }
-
+        //获取实例化名字
         String name = getInstanceName(instanceName, config);
 
         InstanceFuture future = new InstanceFuture();
+        //将当前的实例化未来对象放入map中，如果不存在的话
         if (INSTANCE_MAP.putIfAbsent(name, future) != null) {
             throw new DuplicateInstanceNameException("HazelcastInstance with name '" + name + "' already exists!");
         }
@@ -188,10 +189,9 @@ public final class HazelcastInstanceFactory {
 
     private static HazelcastInstanceProxy constructHazelcastInstance(Config config, String instanceName, NodeContext nodeContext,
                                                                      InstanceFuture future) {
-        // 获取
+        // 获取当前线程的类加载器
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-        // 获取hazelcast代理对象
         HazelcastInstanceProxy proxy;
         try {
             if (classLoader == null) {
@@ -309,7 +309,9 @@ public final class HazelcastInstanceFactory {
 
     private static class InstanceFuture {
 
+        //hazelcast 代理对象
         private volatile HazelcastInstanceProxy hz;
+        //异常
         private volatile Throwable throwable;
 
         HazelcastInstanceProxy get() {

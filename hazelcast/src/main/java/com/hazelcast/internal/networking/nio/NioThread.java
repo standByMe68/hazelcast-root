@@ -234,6 +234,9 @@ public class NioThread extends Thread implements OperationHostileThread {
         //
         // The idea about this approach is that the runSelectNowLoop and runSelectLoop are as clean as possible and don't contain
         // any logic that isn't happening on the happy-path.
+
+        System.out.println();
+
         try {
             for (; ; ) {
                 try {

@@ -118,18 +118,24 @@ public class HazelcastInstanceImpl implements HazelcastInstance, SerializationSe
         this.name = name;
         this.lifecycleService = new LifecycleServiceImpl(this);
 
+        //获取管理器的上下文对象
         ManagedContext configuredManagedContext = config.getManagedContext();
+        //初始化hazelcast管理器上下文
+        //在实现hazelcast自定义序列化时会给管理器上下文赋值
         managedContext = new HazelcastManagedContext(this, configuredManagedContext);
 
         //we are going to copy the user-context map of the Config so that each HazelcastInstance will get its own
         //user-context map instance instead of having a shared map instance. So changes made to the user-context map
         //in one HazelcastInstance will not reflect on other the user-context of other HazelcastInstances.
+        //复制一份上下文，每一个hazelcast实例都有一个属于自己的上下文，因此，当修改了一个hazelcast的上下文之后不会影响到其他的实例
         userContext.putAll(config.getUserContext());
+        //nodeContext  是初始化的一个默认上下文对象
         node = createNode(config, nodeContext);
 
         try {
             logger = node.getLogger(getClass().getName());
 
+            //开始节点处理
             node.start();
 
             if (!node.isRunning()) {

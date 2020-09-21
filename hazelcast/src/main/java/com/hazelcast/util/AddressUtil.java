@@ -109,6 +109,12 @@ public final class AddressUtil {
         return getAddressHolder(address, -1);
     }
 
+    /**
+     * 传入地址和端口号
+     * @param address    ip地址
+     * @param defaultPort   默认端口号 -1
+     * @return
+     */
     public static AddressHolder getAddressHolder(final String address, int defaultPort) {
         final int indexBracketStart = address.indexOf('[');
         final int indexBracketEnd = address.indexOf(']', indexBracketStart);

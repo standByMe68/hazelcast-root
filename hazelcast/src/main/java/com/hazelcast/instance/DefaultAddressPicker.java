@@ -105,6 +105,7 @@ class DefaultAddressPicker implements AddressPicker {
 
         int port = networkConfig.getPort();
         // port = 0 means system will pick up an ephemeral port.
+        // 该端口号大于0并且可以是一个增量
         int portTrialCount = port > 0 && networkConfig.isPortAutoIncrement() ? networkConfig.getPortCount() : 1;
         AddressDefinition bindAddressDef = pickAddressDef();
 
@@ -122,7 +123,9 @@ class DefaultAddressPicker implements AddressPicker {
              */
             serverSocketChannel = ServerSocketChannel.open();
             serverSocket = serverSocketChannel.socket();
+            //设置是否可以多次使用
             serverSocket.setReuseAddress(reuseAddress);
+            //设置超时时间  1000s
             serverSocket.setSoTimeout(SOCKET_TIMEOUT_MILLIS);
             try {
                 if (bindAny) {
@@ -133,6 +136,7 @@ class DefaultAddressPicker implements AddressPicker {
                 logger.fine("Trying to bind inet socket address: " + inetSocketAddress);
                 serverSocket.bind(inetSocketAddress, SOCKET_BACKLOG_LENGTH);
                 logger.fine("Bind successful to inet socket address: " + serverSocket.getLocalSocketAddress());
+                //如果5701端口不可用，就是用5702一直往后推
                 break;
             } catch (Exception e) {
                 serverSocket.close();
@@ -155,6 +159,7 @@ class DefaultAddressPicker implements AddressPicker {
 
         // get the actual port that's bound by server socket
         port = serverSocket.getLocalPort();
+        //使用netty 设置是否进行阻塞
         serverSocketChannel.configureBlocking(false);
         bindAddress = createAddress(bindAddressDef, port);
 
@@ -170,7 +175,9 @@ class DefaultAddressPicker implements AddressPicker {
     }
 
     private AddressDefinition pickAddressDef() throws UnknownHostException, SocketException {
+        //获取系统配置的hazelcast配置的本机地址
         AddressDefinition addressDef = getSystemConfiguredAddress();
+        //如果系统没有配置对应的地址
         if (addressDef == null) {
             addressDef = pickInterfaceAddressDef();
         }
@@ -216,10 +223,13 @@ class DefaultAddressPicker implements AddressPicker {
         NetworkConfig networkConfig = config.getNetworkConfig();
         // address -> domain
         Map<String, String> addressDomainMap;
+        //获取当前配置文件中的TCPIP配置
         TcpIpConfig tcpIpConfig = networkConfig.getJoin().getTcpIpConfig();
+        //如果当前的TCPID可以使用
         if (tcpIpConfig.isEnabled()) {
             // LinkedHashMap is to guarantee order
             addressDomainMap = new LinkedHashMap<String, String>();
+            //获取对应的配置成员
             Collection<String> possibleAddresses = TcpIpJoiner.getConfigurationMembers(config);
             for (String possibleAddress : possibleAddresses) {
                 String addressHolder = AddressUtil.getAddressHolder(possibleAddress).getAddress();
@@ -243,6 +253,7 @@ class DefaultAddressPicker implements AddressPicker {
             addressDomainMap = Collections.emptyMap();
         }
         Collection<InterfaceDefinition> interfaces = new HashSet<InterfaceDefinition>();
+        //配置中的interface是否可以用
         if (networkConfig.getInterfaces().isEnabled()) {
             Collection<String> configInterfaces = networkConfig.getInterfaces().getInterfaces();
             for (String configInterface : configInterfaces) {
@@ -295,6 +306,7 @@ class DefaultAddressPicker implements AddressPicker {
         if (address != null) {
             address = address.trim();
             if ("127.0.0.1".equals(address) || "localhost".equals(address)) {
+                //获取host文件中的地址配置
                 return pickLoopbackAddress();
             } else {
                 logger.info("Picking address configured by property 'hazelcast.local.localAddress'");
@@ -332,6 +344,7 @@ class DefaultAddressPicker implements AddressPicker {
     }
 
     private AddressDefinition pickMatchingAddress(Collection<InterfaceDefinition> interfaces) throws SocketException {
+        //调用本地方法栈的方法获取对应的网络接口对象
         Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
         boolean preferIPv4Stack = preferIPv4Stack();
         while (networkInterfaces.hasMoreElements()) {
@@ -339,6 +352,7 @@ class DefaultAddressPicker implements AddressPicker {
             Enumeration<InetAddress> e = ni.getInetAddresses();
             while (e.hasMoreElements()) {
                 InetAddress inetAddress = e.nextElement();
+                //判断当前地址是否是ipv6的地址
                 if (preferIPv4Stack && inetAddress instanceof Inet6Address) {
                     continue;
                 }

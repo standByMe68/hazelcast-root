@@ -78,9 +78,23 @@ public class DynamicConfigurationAwareConfig extends Config {
     private volatile DynamicSecurityConfig dynamicSecurityConfig;
 
     public DynamicConfigurationAwareConfig(Config staticConfig) {
+
+        //当前配置 非动态配置
+        //assert[boolean 表达式 : 错误表达式 （日志）]  为true是继续执行程序，反之抛出错误日志
         assert !(staticConfig instanceof DynamicConfigurationAwareConfig) : "A static Config object is required";
         this.staticConfig = staticConfig;
         this.configPatternMatcher = staticConfig.getConfigPatternMatcher();
+        //配置动态安全配置
+
+        /*securityConfig = SecurityConfig {
+            enabled = false, memberCredentialsConfig = CredentialsFactoryConfig {
+                className = 'null', implementation = null, properties = {}
+            },
+            memberLoginModuleConfigs = [], clientLoginModuleConfigs = [], clientPolicyConfig = PermissionPolicyConfig {
+                className = 'null', implementation = null, properties = {}
+            },
+            clientPermissionConfigs = []
+        }, liteMember = false*/
         dynamicSecurityConfig = new DynamicSecurityConfig(staticConfig.getSecurityConfig(), null);
     }
 

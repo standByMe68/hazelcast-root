@@ -144,7 +144,9 @@ public final class ExecutionServiceImpl implements InternalExecutionService {
 
         int coreSize = RuntimeAvailableProcessors.get();
         // default executors
+        //系统线程
         register(SYSTEM_EXECUTOR, coreSize, Integer.MAX_VALUE, ExecutorType.CACHED);
+        //调度者线程数量      6， 100000*3
         register(SCHEDULED_EXECUTOR, coreSize * POOL_MULTIPLIER, coreSize * QUEUE_MULTIPLIER, ExecutorType.CACHED);
         register(OFFLOADABLE_EXECUTOR, coreSize, OFFLOADABLE_QUEUE_CAPACITY, ExecutorType.CACHED);
         this.globalTaskScheduler = getTaskScheduler(SCHEDULED_EXECUTOR);
@@ -154,8 +156,17 @@ public final class ExecutionServiceImpl implements InternalExecutionService {
         scheduleWithRepetition(completableFutureTask, INITIAL_DELAY, PERIOD, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     *
+     * @param name
+     * @param defaultPoolSize
+     * @param defaultQueueCapacity
+     * @param type
+     * @return
+     */
     @Override
     public ManagedExecutorService register(String name, int defaultPoolSize, int defaultQueueCapacity, ExecutorType type) {
+        //获取配置文件中对应的配置  hz:system hz:scheduled  hz:offloadable
         ExecutorConfig config = nodeEngine.getConfig().getExecutorConfigs().get(name);
 
         int poolSize = defaultPoolSize;
@@ -182,10 +193,12 @@ public final class ExecutionServiceImpl implements InternalExecutionService {
     private ManagedExecutorService createExecutor(String name, int poolSize, int queueCapacity, ExecutorType type) {
         ManagedExecutorService executor;
         if (type == ExecutorType.CACHED) {
+            //线程类型
             executor = new CachedExecutorServiceDelegate(nodeEngine, name, cachedExecutorService, poolSize, queueCapacity);
         } else if (type == ExecutorType.CONCRETE) {
             Node node = nodeEngine.getNode();
             ClassLoader classLoader = nodeEngine.getConfigClassLoader();
+            //实例对象名称
             String hzName = node.getNodeEngine().getHazelcastInstance().getName();
             String internalName = name.startsWith("hz:") ? name.substring(BEGIN_INDEX) : name;
             String threadNamePrefix = createThreadPoolName(hzName, internalName);
@@ -195,6 +208,7 @@ public final class ExecutionServiceImpl implements InternalExecutionService {
                     new LinkedBlockingQueue<Runnable>(queueCapacity),
                     threadFactory
             );
+            //允许线程超时
             pool.allowCoreThreadTimeOut(true);
             executor = pool;
         } else {
